@@ -1,0 +1,110 @@
+<html>
+<head>
+  <script>
+    var g
+    var width=800
+    var height=600
+    var m=4
+    var n=10
+    var B=[]
+    var margines=5
+    var wys=50
+    var szer=(width/n)-margines*(n+1)/n
+    var pad
+    var ball
+    var handle = null
+    var c=0
+
+
+    class Box{
+      constructor(x,y,w,h){
+        this.x=x
+        this.y=y
+        this.w=w
+        this.h=h
+        this.color='rgb('+0+','+256*Math.random()+','+256*Math.random()+')'
+        this.visible=true
+      }
+      drawMe(){
+        g.fillStyle = this.color
+        g.fillRect(this.x, this.y, this.w, this.h)
+      }
+    }
+    window.onload=function(){
+
+      var canvas = document.getElementById('scena')
+
+
+      g = canvas.getContext('2d')
+      create()
+      draw()
+      canvas.addEventListener('mousemove', movePad)
+      handle=setInterval(update,10)
+    }
+
+    function movePad(event){
+      pad.x = event.pageX-50
+
+    }
+    function create(){
+      B = new Array(m)
+      for (var row=0; row<m; row++) {
+        B[row] = new Array(n)
+        for (var col=0; col<n; col++) {
+          const x = margines + col*(szer+margines)
+          const y = margines + row*(wys+margines)
+          B[row][col] = new Box(x,y,szer,wys)
+        }
+      }
+      pad=new Box(350,585,100,10)
+      ball=new Box(20+760*Math.random(),300+200*Math.random(),20,20)
+      ball.dx = 3 - Math.floor(Math.random()*6)
+      ball.dy = -2 - Math.floor(Math.random()*4)
+      ball.drawMe = function() {
+        g.beginPath()
+        g.fillStyle = this.color
+        g.arc(this.x, this.y, 10, 0, 2*Math.PI)
+        g.fill()
+      }
+    }
+    function draw() {
+      g.clearRect(0,0,width,height)
+      for (var row=0; row<m; row++)
+      for (var col=0; col<n; col++)
+      if (B[row][col].visible) B[row][col].drawMe()
+      pad.drawMe()
+      ball.drawMe()
+
+    }
+    function update(){
+      c=0
+      ball.x+=ball.dx
+      ball.y+=ball.dy
+      if(ball.y>=height-25){
+        if((ball.x>=pad.x)&&(ball.x<=pad.x+100)){
+          var a=ball.x-pad.x-50
+          ball.dx=0.12*a
+          ball.dy=-1-0.2*(50-Math.abs(a))
+        }
+        else clearInterval(handle)
+      }
+      if(ball.y<=10) ball.dy*=-1
+      if(ball.x<=10||ball.x>=width-10) ball.dx*=-1
+      for(var i=0;i<m;i++)for(var j=0;j<n;j++)
+        if(((ball.x+10>=B[i][j].x)&&(ball.x-10<=B[i][j].x+szer))&&((ball.y+10>=B[i][j].y)&&(ball.y-10<=B[i][j].y+wys))){
+          B[i][j].visible=false
+
+
+        }
+        else if(Math.floor(10000*Math.random())===0)B[i][j].visible=true
+      for(var i=0;i<m;i++)for(var j=0;j<n;j++) if(B[i][j].visible)c++
+      if(c===0)clearInterval(handle)
+      draw()
+    }
+  </script>
+</head>
+<body>
+  <canvas id='scena' width="800" height="600" style="border:1px solid #d3d3d3;"></canvas>
+
+</body>
+</html>
